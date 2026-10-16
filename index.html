@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#172554">
+  <title>Розклад занять — 11-А</title>
+
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #fff;
+      --ink: #172033;
+      --muted: #64748b;
+      --blue: #2457d6;
+      --blue-light: #eaf0ff;
+      --line: #e5eaf2;
+      --green: #16845b;
+      --green-light: #e9f9f1;
+      --orange: #e58a19;
+      --orange-light: #fff6e8;
+      --green-day: #22c55e;
+      --current-num-bg: #d0f2e1;
+      --next-num-bg: #ffebc9;
+      --next-num-color: #a85b00;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --ink: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #3b82f6;
+      --blue-light: #1e3a8a;
+      --line: #334155;
+      --green: #22c55e;
+      --green-light: #064e3b;
+      --orange: #f59e0b;
+      --orange-light: #451a03;
+      --green-day: #4ade80;
+      --current-num-bg: #065f46;
+      --next-num-bg: #78350f;
+      --next-num-color: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: auto;
+      padding: 24px 16px 36px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #172554, #2457d6);
+      color: white;
+      padding: 26px;
+      border-radius: 22px;
+      box-shadow: 0 12px 30px #1e3a8a22;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      position: relative;
+    }
+
+    .eyebrow {
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      opacity: .8;
+    }
+
+    .hero h1 {
+      margin: 5px 0 0;
+      font-size: clamp(1.8rem, 5vw, 2.7rem);
+    }
+
+    /* Меню налаштувань у кутку */
+    .settings-container {
+      position: relative;
+    }
+
+    .settings-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      border-radius: 12px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .settings-btn:active {
+      transform: scale(0.95);
+    }
+
+    .settings-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      width: 230px;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 20;
+      color: var(--ink);
+    }
+
+    .settings-container.open .settings-menu {
+      display: flex;
+    }
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .setting-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .setting-action-btn {
+      background: var(--blue-light);
+      color: var(--blue);
+      border: none;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .setting-action-btn:hover {
+      background: var(--blue);
+      color: white;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 28px 0 14px;
+    }
+
+    .section-title h2 {
+      font-size: 1.35rem;
+      margin: 0;
+    }
+
+    .hint {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    /* Стиль 1: Сітка днів */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .day-btn {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      padding: 12px 8px;
+      font: inherit;
+      font-weight: 650;
+      color: var(--ink);
+      cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+      text-align: center;
+    }
+
+    .day-btn[aria-pressed="true"] {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .day-btn.today {
+      outline: 4px solid var(--green-day);
+      outline-offset: 2px;
+    }
+
+    /* Стиль 2: Випадаюче меню днів */
+    .day-dropdown-container {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .day-select-btn {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 18px;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      transition: border-color .2s, background .2s;
+    }
+
+    .day-select-btn:hover {
+      border-color: var(--blue);
+    }
+
+    .arrow {
+      transition: transform 0.2s;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .day-dropdown-container.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .days-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      z-index: 10;
+    }
+
+    .day-dropdown-container.open .days-menu {
+      display: flex;
+    }
+
+    .day-option {
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: left;
+      font: inherit;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .day-option:hover {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .day-option[aria-selected="true"] {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .day-option.today::after {
+      content: '• Сьогодні';
+      font-size: 0.75rem;
+      color: var(--green-day);
+      font-weight: 700;
+    }
+
+    .day-option[aria-selected="true"].today::after {
+      color: #fff;
+    }
+
+    .lesson-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .lesson {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 78px;
+      transition: border-color .2s, background .2s;
+    }
+
+    .num {
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .lesson-name {
+      font-weight: 700;
+    }
+
+    .lesson-time {
+      font-size: .86rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .lesson.current {
+      border: 1px solid var(--green);
+      background: var(--green-light);
+    }
+
+    .lesson.current .num {
+      background: var(--current-num-bg);
+      color: var(--green);
+    }
+
+    .lesson.next {
+      border: 1px solid var(--orange);
+      background: var(--orange-light);
+    }
+
+    .lesson.next .num {
+      background: var(--next-num-bg);
+      color: var(--next-num-color);
+    }
+
+    .status {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .8rem;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .wrap {
+        padding: 14px 11px 28px;
+      }
+      .hero {
+        padding: 21px;
+        border-radius: 17px;
+      }
+      .days-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Шкільний розклад</div>
+        <h1>11-А клас</h1>
+      </div>
+
+      <!-- Меню налаштувань -->
+      <div class="settings-container" id="settings-container">
+        <button class="settings-btn" id="settings-btn" aria-label="Налаштування">
+          ⚙️
+        </button>
+        <div class="settings-menu" id="settings-menu">
+          <div class="setting-group">
+            <span class="setting-label">Тема сайту</span>
+            <button class="setting-action-btn" id="theme-toggle-btn">🌙 Темна тема</button>
+          </div>
+          <div class="setting-group">
+            <span class="setting-label">Вигляд днів</span>
+            <button class="setting-action-btn" id="view-toggle-btn">📋 Сітка кнопок</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section aria-labelledby="schedule-heading">
+
+      <div class="section-title">
+        <h2 id="schedule-heading">Розклад уроків</h2>
+        <span class="hint">Обери день</span>
+      </div>
+
+      <!-- Контейнер для вибору днів (рендериться динамічно залежно від налаштувань) -->
+      <div id="day-selector-container"></div>
+
+      <div class="lesson-list" id="lesson-list" aria-live="polite"></div>
+
+      <div class="status" id="status" aria-live="polite">
+        Завантаження розкладу...
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // Посилання на вашу Google Таблицю у форматі CSV
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJYo-hmn4ytUTnisymLY6F4OM2D80T7njDJKmPXwQYy1sFWK7_HWZBbkdDXr7jhoaDdEWKDn-pxG5x/pub?gid=991127379&single=true&output=csv';
+
+    const times = {
+      1: { start: '08:30', end: '09:15' },
+      2: { start: '09:25', end: '10:10' },
+      3: { start: '10:25', end: '11:10' },
+      4: { start: '11:15', end: '12:00' },
+      5: { start: '12:10', end: '12:55' },
+      6: { start: '13:10', end: '13:55' },
+      7: { start: '14:00', end: '14:45' },
+      8: { start: '15:00', end: '15:45' }
+    };
+
+    const dayNames = {
+      mon: 'Понеділок',
+      tue: 'Вівторок',
+      wed: 'Середа',
+      thu: 'Четвер',
+      fri: 'П’ятниця',
+      sat: 'Субота',
+      sun: 'Неділя'
+    };
+
+    const weekdayMap = {
+      1: 'mon',
+      2: 'tue',
+      3: 'wed',
+      4: 'thu',
+      5: 'fri',
+      6: 'sat',
+      0: 'sun'
+    };
+
+    let schedule = {};
+    let selectedDay = '';
+    let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    let viewMode = localStorage.getItem('viewMode') || 'grid'; // 'grid' або 'dropdown'
+
+    const list = document.getElementById('lesson-list');
+    const status = document.getElementById('status');
+    const daySelectorContainer = document.getElementById('day-selector-container');
+    const settingsContainer = document.getElementById('settings-container');
+    const settingsBtn = document.getElementById('settings-btn');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const viewToggleBtn = document.getElementById('view-toggle-btn');
+    const htmlEl = document.documentElement;
+
+    // Застосування теми
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        htmlEl.setAttribute('data-theme', 'dark');
+        themeToggleBtn.textContent = '☀️ Світла тема';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        htmlEl.removeAttribute('data-theme');
+        themeToggleBtn.textContent = '🌙 Темна тема';
+        localStorage.setItem('theme', 'light');
+      }
+      currentTheme = theme;
+    }
+
+    // Застосування режиму перегляду днів
+    function applyViewMode(mode) {
+      viewMode = mode;
+      localStorage.setItem('viewMode', mode);
+      if (mode === 'grid') {
+        viewToggleBtn.textContent = '📋 Випадаюче меню';
+      } else {
+        viewToggleBtn.textContent = '🗂️ Сітка кнопок';
+      }
+      renderDaySelector();
+    }
+
+    applyTheme(currentTheme);
+    applyViewMode(viewMode);
+
+    // Кнопка відкриття/закриття налаштувань
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      settingsContainer.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      settingsContainer.classList.remove('open');
+    });
+
+    themeToggleBtn.addEventListener('click', () => {
+      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    viewToggleBtn.addEventListener('click', () => {
+      applyViewMode(viewMode === 'grid' ? 'dropdown' : 'grid');
+    });
+
+    function getMinutes(time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
+    }
+
+    function getCurrentDay() {
+      return weekdayMap[new Date().getDay()] || null;
+    }
+
+    // Завантаження розкладу з Google Таблиць
+    async function loadSchedule() {
+      try {
+        const response = await fetch(SHEET_CSV_URL);
+        const data = await response.text();
+        
+        const lines = data.trim().split('\n');
+        const newSchedule = {};
+
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',').map(val => val.trim().replace(/^"(.*)"$/, '$1'));
+          if (row.length < 3) continue;
+
+          const day = row[0].toLowerCase();
+          const n = Number(row[1]);
+          const s = row[2];
+
+          if (!newSchedule[day]) {
+            newSchedule[day] = [];
+          }
+          newSchedule[day].push({ n, s });
+        }
+
+        Object.keys(newSchedule).forEach(day => {
+          newSchedule[day].sort((a, b) => a.n - b.n);
+        });
+
+        return newSchedule;
+      } catch (error) {
+        console.error('Помилка завантаження розкладу:', error);
+        return null;
+      }
+    }
+
+    // Рендер вибору днів залежно від обраного режиму в налаштуваннях
+    function renderDaySelector() {
+      const currentDay = getCurrentDay();
+
+      if (viewMode === 'grid') {
+        daySelectorContainer.innerHTML = `
+          <nav class="days-grid" aria-label="Дні тижня">
+            ${Object.keys(schedule).map(day => `
+              <button class="day-btn ${day === currentDay ? 'today' : ''}" data-day="${day}" aria-pressed="${day === selectedDay}">
+                ${dayNames[day] || day}
+              </button>
+            `).join('')}
+          </nav>
+        `;
+
+        document.querySelectorAll('.day-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            showDay(button.dataset.day);
+          });
+        });
+      } else {
+        daySelectorContainer.innerHTML = `
+          <div class="day-dropdown-container" id="dropdown-container">
+            <button class="day-select-btn" id="day-select-btn" aria-expanded="false">
+              <span id="current-day-text">${dayNames[selectedDay] || selectedDay}</span>
+              <span class="arrow">▼</span>
+            </button>
+            <div class="days-menu" id="days-menu">
+              ${Object.keys(schedule).map(day => `
+                <button class="day-option ${day === currentDay ? 'today' : ''}" data-day="${day}" aria-selected="${day === selectedDay}">
+                  <span>${dayNames[day] || day}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        const dropdownContainer = document.getElementById('dropdown-container');
+        const daySelectBtn = document.getElementById('day-select-btn');
+
+        daySelectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdownContainer.classList.toggle('open');
+          daySelectBtn.setAttribute('aria-expanded', dropdownContainer.classList.contains('open'));
+        });
+
+        document.querySelectorAll('.day-option').forEach(option => {
+          option.addEventListener('click', () => {
+            showDay(option.dataset.day);
+            dropdownContainer.classList.remove('open');
+          });
+        });
+      }
+      
+      updateDaySelectionUI();
+    }
+
+    function updateDaySelectionUI() {
+      if (viewMode === 'grid') {
+        document.querySelectorAll('.day-btn').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.day === selectedDay));
+        });
+      } else {
+        const currentDayText = document.getElementById('current-day-text');
+        if (currentDayText) currentDayText.textContent = dayNames[selectedDay] || selectedDay;
+        document.querySelectorAll('.day-option').forEach(option => {
+          option.setAttribute('aria-selected', String(option.dataset.day === selectedDay));
+        });
+      }
+    }
+
+    function showDay(day) {
+      selectedDay = day;
+      updateDaySelectionUI();
+
+      if (!schedule[day] || schedule[day].length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted);">На цей день немає уроків</div>';
+      } else {
+        list.innerHTML = schedule[day].map(lesson => `
+          <article class="lesson" data-lesson="${lesson.n}">
+            <div class="num">${lesson.n}</div>
+            <div>
+              <div class="lesson-name">${lesson.s}</div>
+              <div class="lesson-time">
+                ${times[lesson.n] ? times[lesson.n].start + '–' + times[lesson.n].end : ''}
+              </div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      updateCurrentLesson();
+    }
+
+    function updateCurrentLesson() {
+      const currentDay = getCurrentDay();
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      document.querySelectorAll('.lesson').forEach(lesson => {
+        lesson.classList.remove('current', 'next');
+      });
+
+      if (selectedDay !== currentDay) {
+        status.textContent =
+          'Сьогодні: ' +
+          (currentDay && dayNames[currentDay] ? dayNames[currentDay] : 'вихідний') +
+          '. Перегляд розкладу: ' + (dayNames[selectedDay] || selectedDay) + '.';
+        return;
+      }
+
+      const lessons = schedule[selectedDay] || [];
+      let currentLesson = null;
+      let nextLesson = null;
+      let isBreak = false;
+
+      for (let i = 0; i < lessons.length; i++) {
+        const lesson = lessons[i];
+        if (!times[lesson.n]) continue;
+        
+        const start = getMinutes(times[lesson.n].start);
+        const end = getMinutes(times[lesson.n].end);
+
+        if (currentMinutes >= start && currentMinutes < end) {
+          currentLesson = lesson;
+          break;
+        }
+
+        if (i < lessons.length - 1) {
+          const next = lessons[i + 1];
+          if (!times[next.n]) continue;
+          const nextStart = getMinutes(times[next.n].start);
+
+          if (currentMinutes >= end && currentMinutes < nextStart) {
+            nextLesson = next;
+            isBreak = true;
+            break;
+          }
+        }
+      }
+
+      if (currentLesson) {
+        const card = list.querySelector(
+          `[data-lesson="${currentLesson.n}"]`
+        );
+        if (card) card.classList.add('current');
+
+        status.textContent =
+          'Зараз триває ' + currentLesson.n + ' урок — ' +
+          currentLesson.s + '.';
+      } else if (isBreak && nextLesson) {
+        const card = list.querySelector(
+          `[data-lesson="${nextLesson.n}"]`
+        );
+        if (card) card.classList.add('next');
+
+        status.textContent =
+          'Перерва. Далі: ' + nextLesson.n + ' урок — ' +
+          nextLesson.s + '.';
+      } else {
+        status.textContent = 'Зараз час поза уроками.';
+      }
+    }
+
+    async function init() {
+      schedule = await loadSchedule();
+
+      if (!schedule || Object.keys(schedule).length === 0) {
+        status.textContent = 'Помилка: не вдалося завантажити розклад із таблиці.';
+        return;
+      }
+
+      const currentDay = getCurrentDay();
+      if (currentDay && schedule[currentDay]) {
+        selectedDay = currentDay;
+      } else {
+        selectedDay = Object.keys(schedule)[0];
+      }
+
+      renderDaySelector();
+      showDay(selectedDay);
+
+      setInterval(updateCurrentLesson, 60000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
