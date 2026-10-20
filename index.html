@@ -15,17 +15,25 @@
       --card: #fff;
       --ink: #172033;
       --muted: #64748b;
-      --blue: #2457d6;
-      --blue-light: #eaf0ff;
+      
+      --accent: #2457d6;
+      --hero-dark: #172554;
+      
+      --accent-light: color-mix(in srgb, var(--accent) 15%, var(--card));
+      --accent-num-bg: color-mix(in srgb, var(--accent) 20%, var(--card));
+
       --line: #e5eaf2;
-      --green: #16845b;
-      --green-light: #e9f9f1;
-      --orange: #e58a19;
-      --orange-light: #fff6e8;
+      --green: #22c55e;
+      --green-light: #064e3b;
+      --orange: #f59e0b;
+      --orange-light: #451a03;
       --green-day: #22c55e;
       --current-num-bg: #d0f2e1;
       --next-num-bg: #ffebc9;
       --next-num-color: #a85b00;
+      
+      --active-text: #fff;
+      --accent-light-text: var(--accent);
     }
 
     [data-theme="dark"] {
@@ -33,17 +41,30 @@
       --card: #1e293b;
       --ink: #f8fafc;
       --muted: #94a3b8;
-      --blue: #3b82f6;
-      --blue-light: #1e3a8a;
+      
+      --accent: #3b82f6;
+      --hero-dark: #090d16;
+      
+      --accent-light: color-mix(in srgb, var(--accent) 25%, var(--card));
+      --accent-num-bg: color-mix(in srgb, var(--accent) 35%, var(--card));
+
       --line: #334155;
       --green: #22c55e;
-      --green-light: #064e3b;
+      --green-light: #e9f9f1;
       --orange: #f59e0b;
-      --orange-light: #451a03;
+      --orange-light: #fff6e8;
       --green-day: #4ade80;
       --current-num-bg: #065f46;
       --next-num-bg: #78350f;
       --next-num-color: #fbbf24;
+      
+      --active-text: #fff !important;
+      --accent-light-text: #f8fafc !important;
+    }
+
+    :root:not([data-theme="dark"])[data-bright-accent="true"] {
+      --active-text: #0f172a;
+      --accent-light-text: #0f172a;
     }
 
     * {
@@ -65,37 +86,44 @@
     }
 
     .hero {
-      background: linear-gradient(135deg, #172554, #2457d6);
+      background: linear-gradient(135deg, var(--hero-dark), var(--accent));
       color: white;
       padding: 26px;
       border-radius: 22px;
-      box-shadow: 0 12px 30px #1e3a8a22;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 16px;
       position: relative;
+      transition: background 0.3s;
+      background-size: cover;
+      background-position: center;
+      aspect-ratio: 728 / 130;
+      min-height: 120px;
     }
 
     .eyebrow {
       font-size: .8rem;
       text-transform: uppercase;
       letter-spacing: .12em;
-      opacity: .8;
+      opacity: .85;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     }
 
     .hero h1 {
       margin: 5px 0 0;
       font-size: clamp(1.8rem, 5vw, 2.7rem);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
 
-    /* Меню налаштувань у кутку */
     .settings-container {
       position: relative;
     }
 
     .settings-btn {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
       border-radius: 12px;
@@ -110,7 +138,7 @@
     }
 
     .settings-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.4);
     }
 
     .settings-btn:active {
@@ -126,7 +154,7 @@
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       padding: 16px;
-      width: 230px;
+      width: 240px;
       display: none;
       flex-direction: column;
       gap: 14px;
@@ -153,8 +181,8 @@
     }
 
     .setting-action-btn {
-      background: var(--blue-light);
-      color: var(--blue);
+      background: var(--accent-light);
+      color: var(--accent-light-text);
       border: none;
       border-radius: 10px;
       padding: 10px 12px;
@@ -167,8 +195,99 @@
     }
 
     .setting-action-btn:hover {
-      background: var(--blue);
-      color: white;
+      background: var(--accent);
+      color: var(--active-text);
+    }
+
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-input {
+      -webkit-appearance: none;
+      border: none;
+      width: 100%;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .color-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-input::-webkit-color-swatch {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    /* Модальне вікно кропу */
+    .crop-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: 16px;
+    }
+
+    .crop-modal.open {
+      display: grid;
+    }
+
+    .crop-dialog {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .crop-container {
+      width: 100%;
+      aspect-ratio: 728 / 130;
+      background: #111;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      touch-action: none;
+      cursor: grab;
+      border: 2px solid var(--accent);
+    }
+
+    .crop-container:active {
+      cursor: grabbing;
+    }
+
+    .crop-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      user-select: none;
+      pointer-events: none;
+      transform-origin: 0 0;
+    }
+
+    .crop-slider {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .crop-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .crop-actions button {
+      flex: 1;
     }
 
     .section-title {
@@ -189,7 +308,6 @@
       color: var(--muted);
     }
 
-    /* Стиль 1: Сітка днів */
     .days-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -210,10 +328,14 @@
       text-align: center;
     }
 
+    .day-btn:hover {
+      border-color: var(--accent);
+    }
+
     .day-btn[aria-pressed="true"] {
-      background: var(--blue);
-      border-color: var(--blue);
-      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--active-text);
     }
 
     .day-btn.today {
@@ -221,7 +343,6 @@
       outline-offset: 2px;
     }
 
-    /* Стиль 2: Випадаюче меню днів */
     .day-dropdown-container {
       position: relative;
       margin-bottom: 14px;
@@ -245,7 +366,7 @@
     }
 
     .day-select-btn:hover {
-      border-color: var(--blue);
+      border-color: var(--accent);
     }
 
     .arrow {
@@ -295,13 +416,13 @@
     }
 
     .day-option:hover {
-      background: var(--blue-light);
-      color: var(--blue);
+      background: var(--accent-light);
+      color: var(--accent-light-text);
     }
 
     .day-option[aria-selected="true"] {
-      background: var(--blue);
-      color: #fff;
+      background: var(--accent);
+      color: var(--active-text);
     }
 
     .day-option.today::after {
@@ -312,7 +433,8 @@
     }
 
     .day-option[aria-selected="true"].today::after {
-      color: #fff;
+      color: var(--active-text);
+      opacity: 0.9;
     }
 
     .lesson-list {
@@ -325,6 +447,7 @@
     .lesson {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 13px;
       background: var(--card);
       border: 1px solid var(--line);
@@ -332,6 +455,13 @@
       padding: 14px;
       min-height: 78px;
       transition: border-color .2s, background .2s;
+      position: relative;
+    }
+
+    .lesson-main {
+      display: flex;
+      align-items: center;
+      gap: 13px;
     }
 
     .num {
@@ -340,19 +470,21 @@
       flex: 0 0 42px;
       height: 42px;
       border-radius: 12px;
-      background: var(--blue-light);
-      color: var(--blue);
+      background: var(--accent-light);
+      color: var(--accent-light-text);
       font-weight: 800;
     }
 
     .lesson-name {
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .lesson-time {
       font-size: .86rem;
       color: var(--muted);
       margin-top: 2px;
+      white-space: nowrap;
     }
 
     .lesson.current {
@@ -375,6 +507,73 @@
       color: var(--next-num-color);
     }
 
+    /* Стилі для кнопки та меню Zoom */
+    .zoom-btn {
+      background: #2D8CFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .zoom-btn:hover {
+      background: #1a73e8;
+    }
+
+    .zoom-btn:active {
+      transform: scale(0.95);
+    }
+
+    .zoom-container {
+      position: relative;
+    }
+
+    .zoom-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      padding: 6px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 15;
+      min-width: 140px;
+    }
+
+    .zoom-container.open .zoom-menu {
+      display: flex;
+    }
+
+    .zoom-link {
+      display: block;
+      padding: 8px 12px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    .zoom-link:hover {
+      background: var(--accent-light);
+      color: var(--accent-light-text);
+    }
+
     .status {
       margin-top: 16px;
       color: var(--muted);
@@ -389,6 +588,8 @@
       .hero {
         padding: 21px;
         border-radius: 17px;
+        aspect-ratio: auto;
+        min-height: 110px;
       }
       .days-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -400,7 +601,7 @@
 <body>
   <main class="wrap">
 
-    <header class="hero">
+    <header class="hero" id="hero-header">
       <div>
         <div class="eyebrow">Шкільний розклад</div>
         <h1>11-А клас</h1>
@@ -420,6 +621,18 @@
             <span class="setting-label">Вигляд днів</span>
             <button class="setting-action-btn" id="view-toggle-btn">📋 Сітка кнопок</button>
           </div>
+          <div class="setting-group">
+            <span class="setting-label">Колір оформлення</span>
+            <div class="color-picker-row">
+              <input type="color" id="accent-color-picker" class="color-input" value="#2457d6">
+            </div>
+          </div>
+          <div class="setting-group">
+            <span class="setting-label">Фото шапки</span>
+            <input type="file" id="hero-img-input" accept="image/*" style="display: none;">
+            <button class="setting-action-btn" id="hero-img-btn">🖼️ Обрати фото</button>
+            <button class="setting-action-btn" id="hero-img-remove" style="margin-top: 4px; display: none; background: #fee2e2; color: #dc2626;">❌ Видалити фото</button>
+          </div>
         </div>
       </div>
     </header>
@@ -431,7 +644,7 @@
         <span class="hint">Обери день</span>
       </div>
 
-      <!-- Контейнер для вибору днів (рендериться динамічно залежно від налаштувань) -->
+      <!-- Контейнер для вибору днів -->
       <div id="day-selector-container"></div>
 
       <div class="lesson-list" id="lesson-list" aria-live="polite"></div>
@@ -443,9 +656,26 @@
     </section>
   </main>
 
+  <!-- Модальне вікно підрізання фото -->
+  <div class="crop-modal" id="crop-modal">
+    <div class="crop-dialog">
+      <h3 style="margin: 0; font-size: 1.1rem;">Налаштування фото шапки</h3>
+      <div class="crop-container" id="crop-container">
+        <img id="crop-image" src="" alt="Кроп зображення">
+      </div>
+      <div>
+        <label style="font-size: 0.85rem; color: var(--muted);">Масштаб:</label>
+        <input type="range" id="crop-zoom" class="crop-slider" min="1" max="3" step="0.01" value="1">
+      </div>
+      <div class="crop-actions">
+        <button type="button" class="setting-action-btn" id="crop-cancel" style="background:#f1f5f9; color:#475569; text-align:center;">Скасувати</button>
+        <button type="button" class="setting-action-btn" id="crop-save" style="text-align:center;">Зберегти</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Посилання на вашу Google Таблицю у форматі CSV
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSJYo-hmn4ytUTnisymLY6F4OM2D80T7njDJKmPXwQYy1sFWK7_HWZBbkdDXr7jhoaDdEWKDn-pxG5x/pub?gid=991127379&single=true&output=csv';
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTSt5jxrFbboL8OD-VjleGtkQxEdGTEVYQ5bqOQ4fveDr97FGx7DPL9WCC1VBN3dtd8heQ4FtP7OkAb/pub?gid=991127379&single=true&output=csv';
 
     const times = {
       1: { start: '08:30', end: '09:15' },
@@ -479,9 +709,11 @@
     };
 
     let schedule = {};
+    let globalSubjectZoomMap = {}; // Карта глобальних посилань Zoom для кожної дисципліни
     let selectedDay = '';
     let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    let viewMode = localStorage.getItem('viewMode') || 'grid'; // 'grid' або 'dropdown'
+    let viewMode = localStorage.getItem('viewMode') || 'grid';
+    let accentColor = localStorage.getItem('accentColor') || null;
 
     const list = document.getElementById('lesson-list');
     const status = document.getElementById('status');
@@ -490,23 +722,87 @@
     const settingsBtn = document.getElementById('settings-btn');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const viewToggleBtn = document.getElementById('view-toggle-btn');
+    const accentColorPicker = document.getElementById('accent-color-picker');
+    const heroHeader = document.getElementById('hero-header');
+    const heroImgInput = document.getElementById('hero-img-input');
+    const heroImgBtn = document.getElementById('hero-img-btn');
+    const heroImgRemove = document.getElementById('hero-img-remove');
     const htmlEl = document.documentElement;
 
-    // Застосування теми
+    const cropModal = document.getElementById('crop-modal');
+    const cropContainer = document.getElementById('crop-container');
+    const cropImage = document.getElementById('crop-image');
+    const cropZoom = document.getElementById('crop-zoom');
+    const cropCancel = document.getElementById('crop-cancel');
+    const cropSave = document.getElementById('crop-save');
+
+    let rawImg = new Image();
+    let imgPosX = 0, imgPosY = 0;
+    let baseScale = 1;
+    let userZoom = 1;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+
+    function checkContrast(hex) {
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      let num = parseInt(c, 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
+      let brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      
+      if (brightness > 160) {
+        htmlEl.setAttribute('data-bright-accent', 'true');
+      } else {
+        htmlEl.removeAttribute('data-bright-accent');
+      }
+    }
+
     function applyTheme(theme) {
       if (theme === 'dark') {
         htmlEl.setAttribute('data-theme', 'dark');
         themeToggleBtn.textContent = '☀️ Світла тема';
         localStorage.setItem('theme', 'dark');
+        if (!accentColor) {
+          accentColorPicker.value = '#3b82f6';
+          checkContrast('#3b82f6');
+        }
       } else {
         htmlEl.removeAttribute('data-theme');
         themeToggleBtn.textContent = '🌙 Темна тема';
         localStorage.setItem('theme', 'light');
+        if (!accentColor) {
+          accentColorPicker.value = '#2457d6';
+          checkContrast('#2457d6');
+        }
       }
       currentTheme = theme;
+      
+      if (accentColor) {
+        document.documentElement.style.setProperty('--accent', accentColor);
+        accentColorPicker.value = accentColor;
+        checkContrast(accentColor);
+      }
     }
 
-    // Застосування режиму перегляду днів
+    function applyAccentColor(color) {
+      accentColor = color;
+      document.documentElement.style.setProperty('--accent', color);
+      localStorage.setItem('accentColor', color);
+      checkContrast(color);
+    }
+
+    function applyHeroBg(imgUrl) {
+      if (imgUrl) {
+        heroHeader.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url(${imgUrl})`;
+        heroImgRemove.style.display = 'block';
+      } else {
+        heroHeader.style.backgroundImage = '';
+        heroImgRemove.style.display = 'none';
+      }
+    }
+
     function applyViewMode(mode) {
       viewMode = mode;
       localStorage.setItem('viewMode', mode);
@@ -519,9 +815,157 @@
     }
 
     applyTheme(currentTheme);
+    if (accentColor) {
+      applyAccentColor(accentColor);
+    }
     applyViewMode(viewMode);
 
-    // Кнопка відкриття/закриття налаштувань
+    const savedHeroBg = localStorage.getItem('heroBg');
+    if (savedHeroBg) {
+      applyHeroBg(savedHeroBg);
+    }
+
+    heroImgBtn.addEventListener('click', () => heroImgInput.click());
+
+    heroImgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+          rawImg = new Image();
+          rawImg.onload = function() {
+            cropModal.classList.add('open');
+            initCropTool();
+          };
+          rawImg.src = uploadEvent.target.result;
+          cropImage.src = uploadEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+      heroImgInput.value = '';
+    });
+
+    function initCropTool() {
+      const containerW = cropContainer.clientWidth;
+      const containerH = cropContainer.clientHeight;
+
+      const scaleX = containerW / rawImg.width;
+      const scaleY = containerH / rawImg.height;
+      baseScale = Math.max(scaleX, scaleY);
+      
+      userZoom = 1;
+      cropZoom.value = 1;
+
+      imgPosX = (containerW - rawImg.width * baseScale) / 2;
+      imgPosY = (containerH - rawImg.height * baseScale) / 2;
+
+      clampAndRenderCrop();
+    }
+
+    function clampAndRenderCrop() {
+      const containerW = cropContainer.clientWidth;
+      const containerH = cropContainer.clientHeight;
+      const currentScale = baseScale * userZoom;
+
+      const currentW = rawImg.width * currentScale;
+      const currentH = rawImg.height * currentScale;
+
+      if (imgPosX > 0) imgPosX = 0;
+      if (imgPosY > 0) imgPosY = 0;
+
+      if (imgPosX < containerW - currentW) imgPosX = containerW - currentW;
+      if (imgPosY < containerH - currentH) imgPosY = containerH - currentH;
+
+      cropImage.style.width = rawImg.width + 'px';
+      cropImage.style.height = rawImg.height + 'px';
+      cropImage.style.transform = `translate(${imgPosX}px, ${imgPosY}px) scale(${currentScale})`;
+    }
+
+    cropContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startX = e.clientX - imgPosX;
+      startY = e.clientY - imgPosY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      imgPosX = e.clientX - startX;
+      imgPosY = e.clientY - startY;
+      clampAndRenderCrop();
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    cropContainer.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX - imgPosX;
+      startY = e.touches[0].clientY - imgPosY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      imgPosX = e.touches[0].clientX - startX;
+      imgPosY = e.touches[0].clientY - startY;
+      clampAndRenderCrop();
+    });
+
+    window.addEventListener('touchend', () => { isDragging = false; });
+
+    cropZoom.addEventListener('input', (e) => {
+      const prevScale = baseScale * userZoom;
+      userZoom = parseFloat(e.target.value);
+      const newScale = baseScale * userZoom;
+
+      const containerW = cropContainer.clientWidth;
+      const containerH = cropContainer.clientHeight;
+
+      const centerX = containerW / 2;
+      const centerY = containerH / 2;
+
+      imgPosX = centerX - (centerX - imgPosX) * (newScale / prevScale);
+      imgPosY = centerY - (centerY - imgPosY) * (newScale / prevScale);
+
+      clampAndRenderCrop();
+    });
+
+    cropCancel.addEventListener('click', () => {
+      cropModal.classList.remove('open');
+    });
+
+    cropSave.addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      const targetW = 1200;
+      const targetH = 214;
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      const containerW = cropContainer.clientWidth;
+      const renderScale = targetW / containerW;
+      const finalScale = baseScale * userZoom * renderScale;
+
+      ctx.drawImage(
+        rawImg,
+        0, 0, rawImg.width, rawImg.height,
+        imgPosX * renderScale, imgPosY * renderScale,
+        rawImg.width * finalScale, rawImg.height * finalScale
+      );
+
+      const croppedBase64 = canvas.toDataURL('image/jpeg', 0.88);
+      applyHeroBg(croppedBase64);
+      localStorage.setItem('heroBg', croppedBase64);
+      cropModal.classList.remove('open');
+    });
+
+    heroImgRemove.addEventListener('click', () => {
+      localStorage.removeItem('heroBg');
+      applyHeroBg(null);
+    });
+
+    accentColorPicker.addEventListener('input', (e) => {
+      applyAccentColor(e.target.value);
+    });
+
     settingsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       settingsContainer.classList.toggle('open');
@@ -529,6 +973,11 @@
 
     document.addEventListener('click', () => {
       settingsContainer.classList.remove('open');
+      document.querySelectorAll('.zoom-container').forEach(c => c.classList.remove('open'));
+    });
+
+    document.getElementById('settings-menu').addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
     themeToggleBtn.addEventListener('click', () => {
@@ -548,7 +997,21 @@
       return weekdayMap[new Date().getDay()] || null;
     }
 
-    // Завантаження розкладу з Google Таблиць
+    // Парсинг посилань Zoom
+    function parseZoomLinks(zoomStr) {
+      if (!zoomStr) return [];
+      const parts = zoomStr.split('|').map(s => s.trim()).filter(Boolean);
+      return parts.map(part => {
+        if (part.includes('http')) {
+          const splitIdx = part.indexOf('http');
+          const label = part.substring(0, splitIdx).replace(/[:\-]/g, '').trim();
+          const url = part.substring(splitIdx).trim();
+          return { label: label || 'Приєднатися', url };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
     async function loadSchedule() {
       try {
         const response = await fetch(SHEET_CSV_URL);
@@ -556,6 +1019,7 @@
         
         const lines = data.trim().split('\n');
         const newSchedule = {};
+        globalSubjectZoomMap = {};
 
         for (let i = 1; i < lines.length; i++) {
           const row = lines[i].split(',').map(val => val.trim().replace(/^"(.*)"$/, '$1'));
@@ -564,11 +1028,16 @@
           const day = row[0].toLowerCase();
           const n = Number(row[1]);
           const s = row[2];
+          const zoomRaw = row[3] || '';
+
+          if (zoomRaw && !globalSubjectZoomMap[s]) {
+            globalSubjectZoomMap[s] = zoomRaw;
+          }
 
           if (!newSchedule[day]) {
             newSchedule[day] = [];
           }
-          newSchedule[day].push({ n, s });
+          newSchedule[day].push({ n, s, zoomRaw });
         }
 
         Object.keys(newSchedule).forEach(day => {
@@ -582,7 +1051,6 @@
       }
     }
 
-    // Рендер вибору днів залежно від обраного режиму в налаштуваннях
     function renderDaySelector() {
       const currentDay = getCurrentDay();
 
@@ -657,20 +1125,68 @@
       selectedDay = day;
       updateDaySelectionUI();
 
-      if (!schedule[day] || schedule[day].length === 0) {
+      const dayLessons = schedule[day] || [];
+
+      if (dayLessons.length === 0) {
         list.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted);">На цей день немає уроків</div>';
       } else {
-        list.innerHTML = schedule[day].map(lesson => `
-          <article class="lesson" data-lesson="${lesson.n}">
-            <div class="num">${lesson.n}</div>
-            <div>
-              <div class="lesson-name">${lesson.s}</div>
-              <div class="lesson-time">
-                ${times[lesson.n] ? times[lesson.n].start + '–' + times[lesson.n].end : ''}
+        list.innerHTML = dayLessons.map((lesson, idx) => {
+          // Якщо поточний урок такий самий, як і попередній — ховаємо Zoom на другому
+          const isDuplicateNext = idx > 0 && dayLessons[idx - 1].s === lesson.s;
+
+          const rawZoom = lesson.zoomRaw || globalSubjectZoomMap[lesson.s] || '';
+          const zoomLinks = isDuplicateNext ? [] : parseZoomLinks(rawZoom);
+
+          let zoomHtml = '';
+          if (zoomLinks.length === 1) {
+            zoomHtml = `
+              <a href="${zoomLinks[0].url}" target="_blank" rel="noopener noreferrer" class="zoom-btn">
+                📹 Zoom
+              </a>
+            `;
+          } else if (zoomLinks.length > 1) {
+            zoomHtml = `
+              <div class="zoom-container">
+                <button type="button" class="zoom-btn zoom-dropdown-btn">
+                  📹 Zoom ▼
+                </button>
+                <div class="zoom-menu">
+                  ${zoomLinks.map(link => `
+                    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="zoom-link">
+                      ${link.label}
+                    </a>
+                  `).join('')}
+                </div>
               </div>
-            </div>
-          </article>
-        `).join('');
+            `;
+          }
+
+          return `
+            <article class="lesson" data-lesson="${lesson.n}">
+              <div class="lesson-main">
+                <div class="num">${lesson.n}</div>
+                <div>
+                  <div class="lesson-name">${lesson.s}</div>
+                  <div class="lesson-time">
+                    ${times[lesson.n] ? times[lesson.n].start + '–' + times[lesson.n].end : ''}
+                  </div>
+                </div>
+              </div>
+              ${zoomHtml}
+            </article>
+          `;
+        }).join('');
+
+        // Додаємо обробники для випадаючих меню Zoom (для груп)
+        document.querySelectorAll('.zoom-dropdown-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const container = btn.closest('.zoom-container');
+            const wasOpen = container.classList.contains('open');
+            document.querySelectorAll('.zoom-container').forEach(c => c.classList.remove('open'));
+            if (!wasOpen) container.classList.add('open');
+          });
+        });
       }
 
       updateCurrentLesson();
