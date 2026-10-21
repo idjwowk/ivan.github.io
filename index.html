@@ -10,6 +10,141 @@
   <title>Розклад занять — 11-А</title>
 
   <style>
+/* Контейнер у правому нижньому кутку */
+#mascot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+/* Перемикач у меню налаштувань (Toggle Switch) */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--line);
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Кнопка маскота */
+#mascot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.2s ease;
+}
+
+#mascot-btn:hover {
+  transform: scale(1.08);
+}
+
+#mascot-btn:active {
+  transform: scale(0.95);
+}
+
+/* Обмеження розмірів зображення */
+#mascot-img {
+  width: 120px;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+  display: block;
+}
+
+/* Хмарка діалогу */
+#mascot-speech-bubble {
+  position: relative;
+  background: #ffffff;
+  color: #1f2937;
+  border: 2px solid #e5e7eb;
+  padding: 12px 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  max-width: 260px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+/* Маленький хвостик хмарки, спрямований до маскота */
+#mascot-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 28px;
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border-right: 2px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+
+/* Стан прихованої хмарки */
+.mascot-bubble-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  pointer-events: none;
+}
+
+/* Стан видимої хмарки */
+.mascot-bubble-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
     :root {
       --bg: #f3f6fb;
       --card: #fff;
@@ -23,10 +158,10 @@
       --accent-num-bg: color-mix(in srgb, var(--accent) 20%, var(--card));
 
       --line: #e5eaf2;
-      --green: #16845b;
-      --green-light: #e9f9f1;
-      --orange: #e58a19;
-      --orange-light: #fff6e8;
+      --green: #22c55e;
+      --green-light: #064e3b;
+      --orange: #f59e0b;
+      --orange-light: #451a03;
       --green-day: #22c55e;
       --current-num-bg: #d0f2e1;
       --next-num-bg: #ffebc9;
@@ -50,9 +185,9 @@
 
       --line: #334155;
       --green: #22c55e;
-      --green-light: #064e3b;
+      --green-light: #e9f9f1;
       --orange: #f59e0b;
-      --orange-light: #451a03;
+      --orange-light: #fff6e8;
       --green-day: #4ade80;
       --current-num-bg: #065f46;
       --next-num-bg: #78350f;
@@ -633,6 +768,15 @@
             <button class="setting-action-btn" id="hero-img-btn">🖼️ Обрати фото</button>
             <button class="setting-action-btn" id="hero-img-remove" style="margin-top: 4px; display: none; background: #fee2e2; color: #dc2626;">❌ Видалити фото</button>
           </div>
+          <div class="setting-group">
+            <div class="toggle-row">
+              <span class="setting-label">Маскот</span>
+              <label class="switch">
+                <input type="checkbox" id="mascot-toggle">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -674,8 +818,34 @@
     </div>
   </div>
 
+  <!-- Контейнер маскота -->
+  <div id="mascot-container" style="display: none;">
+    <div id="mascot-speech-bubble" class="mascot-bubble-hidden">
+      <div id="mascot-text">Завантаження...</div>
+    </div>
+    
+    <button id="mascot-btn" type="button" aria-label="Шкільний маскот">
+      <img id="mascot-img" src="mascot_off.png" alt="Маскот" />
+    </button>
+  </div>
+
   <script>
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTSt5jxrFbboL8OD-VjleGtkQxEdGTEVYQ5bqOQ4fveDr97FGx7DPL9WCC1VBN3dtd8heQ4FtP7OkAb/pub?gid=991127379&single=true&output=csv';
+
+    // === НАЛАШТУВАННЯ МАСКОТА ===
+    const MASCOT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWzGnh11pTI5BvBp829y7iGJ74l__F1H-02-KsYDXXG1ZEnoCyvXPMRLw7gDVAL-KJSegQiB_EEZZk/pub?gid=0&single=true&output=csv'; // Твоє посилання на CSV з жартами
+
+    // Зображення трьох емоцій/станів маскота
+    const MASCOT_IMAGES = {
+      lesson: 'mascot_lesson.png', // Під час уроку
+      break: 'mascot_break.png',   // На перерві
+      off: 'mascot_off.png'        // Поза уроками
+    };
+
+    let mascotEnabled = localStorage.getItem('mascotEnabled') === 'true'; // За замовчуванням false
+    let mascotJokes = [];
+    let mascotJokeIndex = -1;
+    let mascotState = 'off';
 
     const times = {
       1: { start: '08:30', end: '09:15' },
@@ -709,7 +879,7 @@
     };
 
     let schedule = {};
-    let globalSubjectZoomMap = {}; // Карта глобальних посилань Zoom для кожної дисципліни
+    let globalSubjectZoomMap = {};
     let selectedDay = '';
     let currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     let viewMode = localStorage.getItem('viewMode') || 'grid';
@@ -735,6 +905,14 @@
     const cropZoom = document.getElementById('crop-zoom');
     const cropCancel = document.getElementById('crop-cancel');
     const cropSave = document.getElementById('crop-save');
+
+    // Елементи DOM маскота
+    const mascotContainer = document.getElementById('mascot-container');
+    const mascotBtn = document.getElementById('mascot-btn');
+    const mascotImg = document.getElementById('mascot-img');
+    const speechBubble = document.getElementById('mascot-speech-bubble');
+    const mascotText = document.getElementById('mascot-text');
+    const mascotToggle = document.getElementById('mascot-toggle');
 
     let rawImg = new Image();
     let imgPosX = 0, imgPosY = 0;
@@ -974,6 +1152,7 @@
     document.addEventListener('click', () => {
       settingsContainer.classList.remove('open');
       document.querySelectorAll('.zoom-container').forEach(c => c.classList.remove('open'));
+      hideMascotBubble();
     });
 
     document.getElementById('settings-menu').addEventListener('click', (e) => {
@@ -1010,6 +1189,124 @@
         }
         return null;
       }).filter(Boolean);
+    }
+
+    // Логіка станів маскота (Урок, Перерва, Поза уроками)
+    function getMascotState() {
+      const now = new Date();
+      const dayOfWeek = weekdayMap[now.getDay()];
+      
+      if (!schedule[dayOfWeek] || schedule[dayOfWeek].length === 0) {
+        return 'off';
+      }
+
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const dayLessons = schedule[dayOfWeek];
+
+      const firstLessonNum = dayLessons[0].n;
+      const lastLessonNum = dayLessons[dayLessons.length - 1].n;
+
+      const dayStartTime = getMinutes(times[firstLessonNum].start);
+      const dayEndTime = getMinutes(times[lastLessonNum].end);
+
+      if (currentMinutes < dayStartTime || currentMinutes > dayEndTime) {
+        return 'off';
+      }
+
+      for (let i = 0; i < dayLessons.length; i++) {
+        const l = dayLessons[i];
+        const lessonStart = getMinutes(times[l.n].start);
+        const lessonEnd = getMinutes(times[l.n].end);
+
+        if (currentMinutes >= lessonStart && currentMinutes <= lessonEnd) {
+          return 'lesson';
+        }
+
+        if (i < dayLessons.length - 1) {
+          const nextLesson = dayLessons[i + 1];
+          const nextStart = getMinutes(times[nextLesson.n].start);
+          if (currentMinutes > lessonEnd && currentMinutes < nextStart) {
+            return 'break';
+          }
+        }
+      }
+
+      return 'off';
+    }
+
+    function updateMascotEmotion() {
+      const newState = getMascotState();
+      if (newState !== mascotState || !mascotImg.src.includes(MASCOT_IMAGES[newState])) {
+        mascotState = newState;
+        mascotImg.src = MASCOT_IMAGES[mascotState];
+      }
+    }
+
+    // Універсальний парсер CSV (для жартів)
+    function parseCSV(text) {
+      const lines = [];
+      let currentLine = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (currentLine.trim()) {
+            lines.push(currentLine.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+          }
+          currentLine = '';
+        } else {
+          currentLine += char;
+        }
+      }
+      if (currentLine.trim()) {
+        lines.push(currentLine.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
+      }
+      return lines;
+    }
+
+    async function loadMascotJokes() {
+      if (!MASCOT_CSV_URL || MASCOT_CSV_URL.includes('YOUR_JOKES_CSV_URL')) {
+        mascotJokes = ['Вкажи CSV посилання на жарти у JS-коді!'];
+        return;
+      }
+      try {
+        const response = await fetch(MASCOT_CSV_URL);
+        if (!response.ok) throw new Error('Помилка завантаження CSV');
+        const data = await response.text();
+        const parsed = parseCSV(data);
+        mascotJokes = parsed.length > 0 ? parsed : ['Таблиця з жартами порожня 😅'];
+      } catch (err) {
+        console.error('Помилка завантаження жартів:', err);
+        mascotJokes = ['Не вдалося завантажити жарт. Перевір доступ!'];
+      }
+    }
+
+    function showNextMascotJoke() {
+      if (mascotJokes.length === 0) return;
+      
+      updateMascotEmotion();
+
+      let nextIndex;
+      if (mascotJokes.length === 1) {
+        nextIndex = 0;
+      } else {
+        do {
+          nextIndex = Math.floor(Math.random() * mascotJokes.length);
+        } while (nextIndex === mascotJokeIndex);
+      }
+
+      mascotJokeIndex = nextIndex;
+      mascotText.textContent = mascotJokes[mascotJokeIndex];
+      speechBubble.classList.remove('mascot-bubble-hidden');
+      speechBubble.classList.add('mascot-bubble-visible');
+    }
+
+    function hideMascotBubble() {
+      speechBubble.classList.remove('mascot-bubble-visible');
+      speechBubble.classList.add('mascot-bubble-hidden');
     }
 
     async function loadSchedule() {
@@ -1131,9 +1428,7 @@
         list.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted);">На цей день немає уроків</div>';
       } else {
         list.innerHTML = dayLessons.map((lesson, idx) => {
-          // Якщо поточний урок такий самий, як і попередній — ховаємо Zoom на другому
           const isDuplicateNext = idx > 0 && dayLessons[idx - 1].s === lesson.s;
-
           const rawZoom = lesson.zoomRaw || globalSubjectZoomMap[lesson.s] || '';
           const zoomLinks = isDuplicateNext ? [] : parseZoomLinks(rawZoom);
 
@@ -1177,7 +1472,6 @@
           `;
         }).join('');
 
-        // Додаємо обробники для випадаючих меню Zoom (для груп)
         document.querySelectorAll('.zoom-dropdown-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1240,18 +1534,14 @@
       }
 
       if (currentLesson) {
-        const card = list.querySelector(
-          `[data-lesson="${currentLesson.n}"]`
-        );
+        const card = list.querySelector(`[data-lesson="${currentLesson.n}"]`);
         if (card) card.classList.add('current');
 
         status.textContent =
           'Зараз триває ' + currentLesson.n + ' урок — ' +
           currentLesson.s + '.';
       } else if (isBreak && nextLesson) {
-        const card = list.querySelector(
-          `[data-lesson="${nextLesson.n}"]`
-        );
+        const card = list.querySelector(`[data-lesson="${nextLesson.n}"]`);
         if (card) card.classList.add('next');
 
         status.textContent =
@@ -1261,6 +1551,42 @@
         status.textContent = 'Зараз час поза уроками.';
       }
     }
+
+    // Налаштування подій маскота
+    mascotToggle.checked = mascotEnabled;
+    mascotContainer.style.display = mascotEnabled ? 'flex' : 'none';
+
+    mascotToggle.addEventListener('change', (e) => {
+      mascotEnabled = e.target.checked;
+      localStorage.setItem('mascotEnabled', mascotEnabled);
+      mascotContainer.style.display = mascotEnabled ? 'flex' : 'none';
+      if (mascotEnabled) {
+        updateMascotEmotion();
+        if (mascotJokes.length === 0) loadMascotJokes();
+      } else {
+        hideMascotBubble();
+      }
+    });
+
+    mascotBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showNextMascotJoke();
+    });
+
+    speechBubble.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    if (mascotEnabled) {
+      loadMascotJokes();
+      updateMascotEmotion();
+    }
+
+    setInterval(() => {
+      if (mascotEnabled) {
+        updateMascotEmotion();
+      }
+    }, 30000);
 
     async function init() {
       schedule = await loadSchedule();
